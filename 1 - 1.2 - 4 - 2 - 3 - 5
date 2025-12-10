@@ -1,0 +1,448 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <limits>
+
+
+int readInt(const std::string& prompt) {
+    int value;
+    while (true) {
+        std::cout << prompt;
+        std::cin >> value;
+        if (std::cin.fail()) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "Ошибка ввода! Введите целое число.\n";
+        } else {
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            return value;
+        }
+    }
+}
+
+int readPositiveInt(const std::string& prompt) {
+    int value;
+    while (true) {
+        value = readInt(prompt);
+        if (value > 0) {
+            return value;
+        }
+        std::cout << "Число должно быть положительным! Попробуйте снова.\n";
+    }
+}
+
+
+class Time {
+private:
+    int seconds; 
+    
+public:
+    Time(int sec = 0) : seconds(sec % 86400) {
+        if (seconds < 0) seconds = 0;
+    }
+    
+
+    int getSeconds() const { return seconds; }
+    
+    
+    std::string toString() const {
+        int hours = seconds / 3600;
+        int minutes = (seconds % 3600) / 60;
+        int secs = seconds % 60;
+        
+        return std::to_string(hours) + ":" + 
+               (minutes < 10 ? "0" : "") + std::to_string(minutes) + ":" + 
+               (secs < 10 ? "0" : "") + std::to_string(secs);
+    }
+    
+    
+    void print() const {
+        std::cout << "Время: " << toString() << " (" << seconds << " секунд)" << std::endl;
+    }
+    
+    
+    static void demo() {
+        std::cout << "\n--- ЗАДАНИЕ 1.1: ВРЕМЯ ---\n";
+        std::cout << "Примеры из задания:\n";
+        Time time1(10);
+        Time time2(10000);
+        Time time3(100000);
+        time1.print();
+        time2.print();
+        time3.print();
+        
+        
+        std::cout << "\n--- Пользовательский ввод ---\n";
+        int userSeconds = readPositiveInt("Введите количество секунд: ");
+        Time userTime(userSeconds);
+        std::cout << "Ваше время: ";
+        userTime.print();
+    }
+};
+
+
+class House {
+private:
+    const int floors; 
+    
+public:
+    House(int numFloors) : floors(numFloors > 0 ? numFloors : 1) {}
+    
+    int getFloors() const { return floors; }
+    
+    std::string getFloorWord() const {
+        int lastDigit = floors % 10;
+        int lastTwoDigits = floors % 100;
+        
+        if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
+            return "этажами";
+        }
+        
+        switch (lastDigit) {
+            case 1: return "этажом";
+            case 2:
+            case 3:
+            case 4: return "этажами";
+            default: return "этажами";
+        }
+    }
+    
+  
+    std::string toString() const {
+        return "дом с " + std::to_string(floors) + " " + getFloorWord();
+    }
+    
+   
+    void print() const {
+        std::cout << toString() << std::endl;
+    }
+    
+    
+    static void demo() {
+        std::cout << "\n--- ЗАДАНИЕ 1.2 и 4: ДОМ ---\n";
+        std::cout << "Примеры из задания:\n";
+        House house1(1);
+        House house2(5);
+        House house3(23);
+        house1.print();
+        house2.print();
+        house3.print();
+        
+       
+        std::cout << "\n--- Пользовательский ввод ---\n";
+        std::cout << "Создание домов с разным количеством этажей:\n";
+        
+        int floors1 = readPositiveInt("Введите количество этажей для первого дома: ");
+        int floors2 = readPositiveInt("Введите количество этажей для второго дома: ");
+        int floors3 = readPositiveInt("Введите количество этажей для третьего дома: ");
+        
+        House userHouse1(floors1);
+        House userHouse2(floors2);
+        House userHouse3(floors3);
+        
+        std::cout << "\nСозданные дома:\n";
+        userHouse1.print();
+        userHouse2.print();
+        userHouse3.print();
+        
+        std::cout << "\nДемонстрация: дому нельзя изменить количество этажей после создания.\n";
+        std::cout << "Поле 'floors' объявлено как const, поэтому его нельзя изменить.\n";
+        std::cout << "Можно только получить значение через getFloors(): " << userHouse3.getFloors() << std::endl;
+    }
+};
+
+
+class Employee {
+private:
+    std::string name;
+    class Department* department;
+    
+public:
+    Employee(const std::string& empName, class Department* dept = nullptr);
+    
+    std::string getName() const { return name; }
+    class Department* getDepartment() const { return department; }
+    
+    void setDepartment(class Department* dept);
+    
+    std::string toString() const;
+    
+    std::string getDepartmentEmployees() const;
+    
+    void print() const;
+};
+
+
+class Department {
+private:
+    std::string name;
+    Employee* boss;
+    std::vector<Employee*> employees;
+    
+public:
+    Department(const std::string& deptName) : name(deptName), boss(nullptr) {}
+    
+    std::string getName() const { return name; }
+    Employee* getBoss() const { return boss; }
+    const std::vector<Employee*>& getEmployees() const { return employees; }
+    
+    void setBoss(Employee* newBoss) {
+        boss = newBoss;
+    }
+    
+    void addEmployee(Employee* employee) {
+        employees.push_back(employee);
+    }
+    
+
+    std::string getAllEmployeesNames() const {
+        std::string result;
+        for (size_t i = 0; i < employees.size(); ++i) {
+            result += employees[i]->getName();
+            if (i < employees.size() - 1) {
+                result += ", ";
+            }
+        }
+        return result;
+    }
+    
+
+    void print() const {
+        std::cout << "Отдел: " << name << std::endl;
+        if (boss) {
+            std::cout << "Начальник: " << boss->getName() << std::endl;
+        } else {
+            std::cout << "Начальник: не назначен" << std::endl;
+        }
+        std::cout << "Сотрудники: " << getAllEmployeesNames() << std::endl;
+    }
+};
+
+
+Employee::Employee(const std::string& empName, class Department* dept) 
+    : name(empName), department(dept) {
+    if (dept) {
+        dept->addEmployee(this);
+    }
+}
+
+void Employee::setDepartment(class Department* dept) {
+    department = dept;
+    if (dept) {
+        dept->addEmployee(this);
+    }
+}
+
+std::string Employee::toString() const {
+    if (!department) {
+        return name + " (без отдела)";
+    }
+    
+    if (department->getBoss() == this) {
+        return name + " начальник отдела " + department->getName();
+    } else {
+        if (department->getBoss()) {
+            return name + " работает в отделе " + department->getName() + 
+                   ", начальник которого " + department->getBoss()->getName();
+        } else {
+            return name + " работает в отделе " + department->getName() + 
+                   " (начальник не назначен)";
+        }
+    }
+}
+
+std::string Employee::getDepartmentEmployees() const {
+    if (!department) {
+        return name + " не работает в отделе";
+    }
+    return "Все сотрудники отдела " + department->getName() + ": " + 
+           department->getAllEmployeesNames();
+}
+
+void Employee::print() const {
+    std::cout << toString() << std::endl;
+}
+
+
+class EmployeeDepartmentDemo {
+public:
+    static void demo() {
+        std::cout << "\n--- ЗАДАНИЯ 2 и 3: СОТРУДНИКИ И ОТДЕЛЫ ---\n";
+        
+        std::cout << "Введите название отдела: ";
+        std::string deptName;
+        std::getline(std::cin, deptName);
+        
+        Department userDepartment(deptName);
+        
+        std::cout << "\nВведите информацию о сотрудниках:\n";
+        std::vector<Employee*> employees;
+        
+        int numEmployees = readPositiveInt("Сколько сотрудников добавить в отдел? (минимум 3): ");
+        if (numEmployees < 3) numEmployees = 3;
+        
+        std::cin.ignore(); 
+        
+        for (int i = 0; i < numEmployees; i++) {
+            std::cout << "\nСотрудник #" << (i + 1) << ":\n";
+            std::cout << "Введите имя сотрудника: ";
+            std::string empName;
+            std::getline(std::cin, empName);
+            
+            Employee* emp = new Employee(empName, &userDepartment);
+            employees.push_back(emp);
+        }
+        
+        
+        std::cout << "\n--- Назначение начальника отдела ---\n";
+        std::cout << "Список сотрудников:\n";
+        for (size_t i = 0; i < employees.size(); i++) {
+            std::cout << (i + 1) << ". " << employees[i]->getName() << std::endl;
+        }
+        
+        int bossIndex;
+        do {
+            bossIndex = readInt("Выберите номер сотрудника, который будет начальником: ");
+        } while (bossIndex < 1 || bossIndex > (int)employees.size());
+        
+        userDepartment.setBoss(employees[bossIndex - 1]);
+        
+        
+        std::cout << "\n=== РЕЗУЛЬТАТЫ ===\n";
+        std::cout << "Информация о сотрудниках:\n";
+        for (auto emp : employees) {
+            emp->print();
+        }
+        
+        std::cout << "\nИнформация об отделе:\n";
+        userDepartment.print();
+        
+        std::cout << "\nЗадание 3: Список сотрудников отдела через ссылку на сотрудника:\n";
+        for (size_t i = 0; i < employees.size(); i++) {
+            std::cout << "Через " << employees[i]->getName() << ": " 
+                      << employees[i]->getDepartmentEmployees() << std::endl;
+        }
+        
+        
+        for (auto emp : employees) {
+            delete emp;
+        }
+    }
+};
+
+
+class Pistol {
+private:
+    int bullets;
+    
+public:
+    Pistol(int initialBullets = 5) : bullets(initialBullets > 0 ? initialBullets : 0) {}
+    
+    int getBullets() const { return bullets; }
+    
+    void shoot() {
+        if (bullets > 0) {
+            std::cout << "Бах!" << std::endl;
+            bullets--;
+        } else {
+            std::cout << "Клац!" << std::endl;
+        }
+    }
+    
+    void print() const {
+        std::cout << "Пистолет с " << bullets << " патронами" << std::endl;
+    }
+    
+    static void demo() {
+        std::cout << "\n--- ЗАДАНИЕ 5: ПИСТОЛЕТ ---\n";
+        
+  
+        std::cout << "Хотите создать пистолет с указанием количества патронов? (1 - да, 0 - нет): ";
+        int choice;
+        std::cin >> choice;
+        std::cin.ignore();
+        
+        Pistol* gun;
+        if (choice == 1) {
+            int bullets = readPositiveInt("Введите количество патронов: ");
+            gun = new Pistol(bullets);
+        } else {
+            gun = new Pistol(); 
+        }
+        
+        std::cout << "\nСоздан пистолет: ";
+        gun->print();
+        
+
+        int numShots = readPositiveInt("\nСколько раз выстрелить из пистолета? ");
+        
+        std::cout << "\n--- СТРЕЛЬБА ---\n";
+        for (int i = 1; i <= numShots; i++) {
+            std::cout << "Выстрел " << i << ": ";
+            gun->shoot();
+        }
+        
+        std::cout << "\nСостояние пистолета после стрельбы: ";
+        gun->print();
+        
+        delete gun;
+       
+        std::cout << "\n--- Пример из задания ---\n";
+        std::cout << "Создаем пистолет с 3 патронами и стреляем 5 раз:\n";
+        Pistol exampleGun(3);
+        for (int i = 1; i <= 5; i++) {
+            std::cout << "Выстрел " << i << ": ";
+            exampleGun.shoot();
+        }
+    }
+};
+
+
+int main() {
+    std::cout << "=== ОБЪЕКТНО-ОРИЕНТИРОВАННОЕ ПРОГРАММИРОВАНИЕ ===\n";
+    std::cout << "=== ЛАБОРАТОРНАЯ РАБОТА №3 ===\n\n";
+    
+
+    while (true) {
+        std::cout << "\n=== МЕНЮ ===\n";
+        std::cout << "1. Задание 1.1: Время\n";
+        std::cout << "2. Задание 1.2 и 4: Дом\n";
+        std::cout << "3. Задания 2 и 3: Сотрудники и отделы\n";
+        std::cout << "4. Задание 5: Пистолет\n";
+        std::cout << "5. Выполнить все задания подряд\n";
+        std::cout << "0. Выход\n";
+        
+        int choice = readInt("Выберите задание (0-5): ");
+        
+        switch (choice) {
+            case 1:
+                Time::demo();
+                break;
+            case 2:
+                House::demo();
+                break;
+            case 3:
+                EmployeeDepartmentDemo::demo();
+                break;
+            case 4:
+                Pistol::demo();
+                break;
+            case 5:
+                Time::demo();
+                House::demo();
+                EmployeeDepartmentDemo::demo();
+                Pistol::demo();
+                break;
+            case 0:
+                std::cout << "Завершение работы...\n";
+                return 0;
+            default:
+                std::cout << "Неверный выбор! Попробуйте снова.\n";
+        }
+        
+        std::cout << "\nНажмите Enter для продолжения...";
+        std::cin.get();
+    }
+    
+    return 0;
+}
